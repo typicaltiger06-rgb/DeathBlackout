@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+
+# IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archives / packaged releases
+*.zip
+*.rar
+
+# Contributor archive leftovers (folders that came in Meteez's .rar)
+Backup/
+Backup1/
+System/
+lib/
+UpgradeLog*

@@ -1,5 +1,0 @@
-C:\Users\typic\OneDrive\Desktop\DeathBlackout\obj\Debug\netstandard2.1\DeathBlackout.csproj.AssemblyReference.cache
-C:\Users\typic\OneDrive\Desktop\DeathBlackout\obj\Debug\netstandard2.1\DeathBlackout.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\typic\OneDrive\Desktop\DeathBlackout\obj\Debug\netstandard2.1\DeathBlackout.AssemblyInfoInputs.cache
-C:\Users\typic\OneDrive\Desktop\DeathBlackout\obj\Debug\netstandard2.1\DeathBlackout.AssemblyInfo.cs
-C:\Users\typic\OneDrive\Desktop\DeathBlackout\obj\Debug\netstandard2.1\DeathBlackout.csproj.CoreCompileInputs.cache
