@@ -1,0 +1,102 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>DeathBlackout</AssemblyName>
+    <RootNamespace>DeathBlackout</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <!-- ========================================================================
+       Game path resolution.
+
+       We try, in order:
+         1. NuclearOptionPath passed on the command line:
+              dotnet build -p:NuclearOptionPath="D:\Games\Nuclear Option"
+         2. NUCLEAR_OPTION_PATH environment variable.
+         3. A list of common Steam install locations.
+
+       If none match, we emit a clear error instead of producing a confusing
+       wall of "type not found" messages. The auto-copy step at the bottom
+       is also conditional on the path existing, so CI / source-only builds
+       won't fail just because the game isn't installed.
+       ======================================================================== -->
+  <PropertyGroup>
+    <!-- Environment variable -->
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('$(NUCLEAR_OPTION_PATH)')">$(NUCLEAR_OPTION_PATH)</NuclearOptionPath>
+
+    <!-- Common Windows Steam locations -->
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option')">C:\Program Files (x86)\Steam\steamapps\common\Nuclear Option</NuclearOptionPath>
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('C:\Program Files\Steam\steamapps\common\Nuclear Option')">C:\Program Files\Steam\steamapps\common\Nuclear Option</NuclearOptionPath>
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('D:\Steam\steamapps\common\Nuclear Option')">D:\Steam\steamapps\common\Nuclear Option</NuclearOptionPath>
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('D:\SteamLibrary\steamapps\common\Nuclear Option')">D:\SteamLibrary\steamapps\common\Nuclear Option</NuclearOptionPath>
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('E:\Steam\steamapps\common\Nuclear Option')">E:\Steam\steamapps\common\Nuclear Option</NuclearOptionPath>
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('E:\SteamLibrary\steamapps\common\Nuclear Option')">E:\SteamLibrary\steamapps\common\Nuclear Option</NuclearOptionPath>
+
+    <!-- Linux / SteamDeck -->
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('$(HOME)/.steam/steam/steamapps/common/Nuclear Option')">$(HOME)/.steam/steam/steamapps/common/Nuclear Option</NuclearOptionPath>
+    <NuclearOptionPath Condition="'$(NuclearOptionPath)' == '' AND Exists('$(HOME)/.local/share/Steam/steamapps/common/Nuclear Option')">$(HOME)/.local/share/Steam/steamapps/common/Nuclear Option</NuclearOptionPath>
+
+    <ManagedPath>$(NuclearOptionPath)\NuclearOption_Data\Managed</ManagedPath>
+  </PropertyGroup>
+
+  <Target Name="ValidateGamePath" BeforeTargets="ResolveAssemblyReferences" Condition="'$(NuclearOptionPath)' == ''">
+    <Error Text="Couldn't find Nuclear Option. Set the NUCLEAR_OPTION_PATH environment variable to your install folder, or pass -p:NuclearOptionPath=&quot;...&quot; on the command line. Example: dotnet build -p:NuclearOptionPath=&quot;D:\Games\Nuclear Option&quot;" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedPath)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ManagedPath)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ManagedPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(ManagedPath)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- Mirage is the networking lib NO uses. Player inherits from
+         Mirage.NetworkBehaviour, so we need this even though we don't
+         touch Mirage APIs directly. -->
+    <Reference Include="Mirage">
+      <HintPath>$(ManagedPath)\Mirage.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+     <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(ManagedPath)\UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ManagedPath)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  
+
+  <!-- Auto-copy the built DLL into the game's plugin folder. Skipped silently
+       if the plugins folder doesn't exist (e.g. building on a machine without
+       the game installed). -->
+  <Target Name="DeployToGame" AfterTargets="Build"
+          Condition="'$(NuclearOptionPath)' != '' AND Exists('$(NuclearOptionPath)\BepInEx\plugins')">
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(NuclearOptionPath)\BepInEx\plugins\"
+          SkipUnchangedFiles="false" />
+    <Message Importance="high" Text="Deployed $(TargetFileName) -> $(NuclearOptionPath)\BepInEx\plugins\" />
+  </Target>
+
+</Project>
